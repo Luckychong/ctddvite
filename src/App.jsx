@@ -1,4 +1,7 @@
+import React from "react";
 import "./App.css";
+import TodoList from "./TodoList"; // Import TodoList
+import TodoForm from "./TodoForm"; // Import TodoForm
 
 function App() {
   // Array of todos
@@ -11,12 +14,10 @@ function App() {
   return (
     <div>
       <h1>Todo List</h1>
-      <ul>
-        {/* Map over the todos array to render each todo item */}
-        {todos.map((todo) => (
-          <li key={todo.id}>{todo.title}</li>
-        ))}
-      </ul>
+      {/* Add the TodoForm */}
+      <TodoForm />
+      {/* Pass the todos array as a prop to TodoList */}
+      <TodoList todos={todos} />
     </div>
   );
 }
