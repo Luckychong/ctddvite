@@ -1,23 +1,33 @@
-import React from "react";
-import "./App.css";
-import TodoList from "./TodoList"; // Import TodoList
-import TodoForm from "./TodoForm"; // Import TodoForm
+import React, { useState } from "react";
+import "./App.css"; 
+import TodoList from "./TodoList"; 
+import TodoForm from "./TodoForm"; 
 
 function App() {
-  // Array of todos
-  const todos = [
+  const [todos, setTodos] = useState([
     { id: 1, title: "review resources" },
     { id: 2, title: "take notes" },
     { id: 3, title: "code out app" },
-  ];
+  ]);
+
+  
+  const [newTodo, setNewTodo] = useState(""); 
+
+  
+  const addTodo = (title) => {
+    const newTodoItem = {
+      id: todos.length + 1, 
+      title: title,
+    };
+    setTodos([...todos, newTodoItem]); 
+  };
 
   return (
     <div>
       <h1>Todo List</h1>
-      {/* Add the TodoForm */}
-      <TodoForm />
-      {/* Pass the todos array as a prop to TodoList */}
+      <TodoForm addTodo={addTodo} setNewTodo={setNewTodo} newTodo={newTodo} />git
       <TodoList todos={todos} />
+      <p>{newTodo}</p>
     </div>
   );
 }
