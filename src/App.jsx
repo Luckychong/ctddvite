@@ -4,27 +4,29 @@ import TodoList from "./TodoList";
 import TodoForm from "./TodoForm";
 
 function App() {
-  const [todos, setTodos] = useState([
+  const [todoList, setTodoList] = useState([
     { id: 1, title: "review resources" },
     { id: 2, title: "take notes" },
     { id: 3, title: "code out app" },
   ]);
 
   const handleAddTodo = (newTodo) => {
+    console.log("App received new todo:", newTodo); 
+
     const newTodoItem = {
-      id: todos.length + 1,
+      id: todoList.length + 1,
       title: newTodo,
     };
-    setTodos([...todos, newTodoItem]);
+    setTodoList([...todoList, newTodoItem]);
   };
+
+  console.log("Current todoList in App:", todoList); 
 
   return (
     <div>
       <h1>Todo List</h1>
       <TodoForm onAddTodo={handleAddTodo} />
-
-  
-      <TodoList todos={todos} />
+      <TodoList todoList={todoList} />
     </div>
   );
 }

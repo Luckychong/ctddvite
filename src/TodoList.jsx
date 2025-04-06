@@ -1,6 +1,8 @@
 import TodoListItem from "./TodoListItem";
 
 function TodoList({ todoList }) {
+  console.log("Rendering TodoList with todos:", todoList);
+
   return (
     <ul>
       {todoList.map((todo) => (
