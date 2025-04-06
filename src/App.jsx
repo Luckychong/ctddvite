@@ -10,12 +10,10 @@ function App() {
     { id: 3, title: "code out app" },
   ]);
 
-  const [newTodo, setNewTodo] = useState("");
-
-  const addTodo = (title) => {
+  const handleAddTodo = (newTodo) => {
     const newTodoItem = {
       id: todos.length + 1,
-      title: title,
+      title: newTodo,
     };
     setTodos([...todos, newTodoItem]);
   };
@@ -23,12 +21,10 @@ function App() {
   return (
     <div>
       <h1>Todo List</h1>
+      <TodoForm onAddTodo={handleAddTodo} />
 
-      <TodoForm addTodo={addTodo} setNewTodo={setNewTodo} newTodo={newTodo} />
-
+  
       <TodoList todos={todos} />
-
-      <p>{newTodo}</p>
     </div>
   );
 }
