@@ -1,22 +1,34 @@
+import { useState } from "react";
 import "./App.css";
+import TodoList from "./TodoList";
+import TodoForm from "./TodoForm";
 
 function App() {
-  // Array of todos
-  const todos = [
+  const [todos, setTodos] = useState([
     { id: 1, title: "review resources" },
     { id: 2, title: "take notes" },
     { id: 3, title: "code out app" },
-  ];
+  ]);
+
+  const [newTodo, setNewTodo] = useState("");
+
+  const addTodo = (title) => {
+    const newTodoItem = {
+      id: todos.length + 1,
+      title: title,
+    };
+    setTodos([...todos, newTodoItem]);
+  };
 
   return (
     <div>
       <h1>Todo List</h1>
-      <ul>
-        {/* Map over the todos array to render each todo item */}
-        {todos.map((todo) => (
-          <li key={todo.id}>{todo.title}</li>
-        ))}
-      </ul>
+
+      <TodoForm addTodo={addTodo} setNewTodo={setNewTodo} newTodo={newTodo} />
+
+      <TodoList todos={todos} />
+
+      <p>{newTodo}</p>
     </div>
   );
 }
