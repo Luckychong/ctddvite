@@ -5,7 +5,7 @@ const TodoListItem = ({ todo, onComplete, onUpdate }) => {
 
   useEffect(() => {
     setWorkingTitle(todo.title);
-  }, [todo]);
+  }, [todo.title]); 
 
   return (
     <li style={{ marginTop: "1rem" }}>
