@@ -3,7 +3,7 @@ import TodoList from "./features/TodoList/TodoList";
 
 const TodoApp = () => {
   const [todoList, setTodoList] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -79,142 +79,110 @@ const TodoApp = () => {
     }
   };
 
-  const updateTodo = async (editedTodo) => {
-    setIsSaving(true);
+ const updateTodo = async (editedTodo) => {
+   setIsSaving(true);
 
-    const originalTodo = todoList.find((todo) => todo.id === editedTodo.id);
+   const originalTodo = todoList.find((todo) => todo.id === editedTodo.id);
 
-    const updatedTodos = todoList.map((todo) =>
-      todo.id === editedTodo.id ? { ...editedTodo } : todo
-    );
-    setTodoList([...updatedTodos]);
+   const updatedTodos = todoList.map((todo) =>
+     todo.id === editedTodo.id ? editedTodo : todo
+   );
+   setTodoList(updatedTodos);
 
-    const payload = {
-      records: [
-        {
-          id: editedTodo.id,
-          fields: {
-            title: editedTodo.title,
-            isCompleted: editedTodo.isCompleted,
-          },
-        },
-      ],
-    };
+   const payload = {
+     records: [
+       {
+         id: editedTodo.id,
+         fields: {
+           title: editedTodo.title,
+           isCompleted: editedTodo.isCompleted,
+         },
+       },
+     ],
+   };
 
-    const options = {
-      method: "PATCH",
-      headers: {
-        Authorization: token,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    };
+   const options = {
+     method: "PATCH",
+     headers: {
+       Authorization: token,
+       "Content-Type": "application/json",
+     },
+     body: JSON.stringify(payload),
+   };
 
-    try {
-      const resp = await fetch(url, options);
+   try {
+     const resp = await fetch(url, options);
 
-      if (!resp.ok) throw new Error(await resp.text());
+     if (!resp.ok) throw new Error(await resp.text());
 
-      const { records } = await resp.json();
+     await resp.json();
+   } catch (error) {
+     console.error(error);
+     setErrorMessage(`${error.message}. Reverting todo...`);
 
-      const updatedTodo = {
-        id: records[0].id,
-        ...records[0].fields,
-      };
+     const revertedTodos = todoList.map((todo) =>
+       todo.id === originalTodo.id ? originalTodo : todo
+     );
+     setTodoList(revertedTodos);
+   } finally {
+     setIsSaving(false);
+   }
+ };
 
-      if (!records[0].fields.isCompleted) {
-        updatedTodo.isCompleted = false;
-      }
+ const completeTodo = async (id) => {
+   setIsSaving(true);
 
-      const refreshedTodos = todoList.map((todo) =>
-        todo.id === updatedTodo.id ? { ...updatedTodo } : todo
-      );
+   const originalTodo = todoList.find((todo) => todo.id === id);
 
-      setTodoList([...refreshedTodos]);
-    } catch (error) {
-      console.error(error);
-      setErrorMessage(`${error.message}. Reverting todo...`);
+   const updatedTodo = {
+     ...originalTodo,
+     isCompleted: !originalTodo.isCompleted,
+   };
 
-      const revertedTodos = todoList.map((todo) =>
-        todo.id === originalTodo.id ? { ...originalTodo } : todo
-      );
+   const updatedTodos = todoList.map((todo) =>
+     todo.id === id ? updatedTodo : todo
+   );
+   setTodoList(updatedTodos);
 
-      setTodoList([...revertedTodos]);
-    } finally {
-      setIsSaving(false);
-    }
-  };
+   const payload = {
+     records: [
+       {
+         id: updatedTodo.id,
+         fields: {
+           title: updatedTodo.title,
+           isCompleted: updatedTodo.isCompleted,
+         },
+       },
+     ],
+   };
 
-  const completeTodo = async (id) => {
-    setIsSaving(true);
+   const options = {
+     method: "PATCH",
+     headers: {
+       Authorization: token,
+       "Content-Type": "application/json",
+     },
+     body: JSON.stringify(payload),
+   };
 
-    const originalTodo = todoList.find((todo) => todo.id === id);
+   try {
+     const resp = await fetch(url, options);
 
-    const updatedTodo = {
-      ...originalTodo,
-      isCompleted: !originalTodo.isCompleted,
-    };
+     if (!resp.ok) throw new Error(await resp.text());
 
-    const updatedTodos = todoList.map((todo) =>
-      todo.id === id ? { ...updatedTodo } : todo
-    );
-    setTodoList([...updatedTodos]);
+     await resp.json();
+   } catch (error) {
+     console.error(error);
+     setErrorMessage(`${error.message}. Reverting todo completion status`);
 
-    const payload = {
-      records: [
-        {
-          id: updatedTodo.id,
-          fields: {
-            title: updatedTodo.title,
-            isCompleted: updatedTodo.isCompleted,
-          },
-        },
-      ],
-    };
-
-    const options = {
-      method: "PATCH",
-      headers: {
-        Authorization: token,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    };
-
-    try {
-      const resp = await fetch(url, options);
-
-      if (!resp.ok) throw new Error(await resp.text());
-
-      const { records } = await resp.json();
-
-      const confirmedTodo = {
-        id: records[0].id,
-        ...records[0].fields,
-      };
-
-      if (!records[0].fields.isCompleted) {
-        confirmedTodo.isCompleted = false;
-      }
-
-      const refreshedTodos = todoList.map((todo) =>
-        todo.id === confirmedTodo.id ? { ...confirmedTodo } : todo
-      );
-
-      setTodoList([...refreshedTodos]);
-    } catch (error) {
-      console.error(error);
-      setErrorMessage(`${error.message}. Reverting todo completion status`);
-
-      const revertedTodos = todoList.map((todo) =>
-        todo.id === originalTodo.id ? { ...originalTodo } : todo
-      );
-
-      setTodoList([...revertedTodos]);
-    } finally {
-      setIsSaving(false);
-    }
-  };
+     const revertedTodos = todoList.map((todo) =>
+       todo.id === originalTodo.id ? originalTodo : todo
+     );
+     setTodoList(revertedTodos);
+   } finally {
+     setIsSaving(false);
+   }
+ };
 
   return (
     <div style={{ padding: "1rem", maxWidth: "500px", margin: "0 auto" }}>

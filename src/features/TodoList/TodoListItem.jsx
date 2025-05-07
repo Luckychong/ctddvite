@@ -1,30 +1,51 @@
 import React, { useState, useEffect } from "react";
 
-const TodoListItem = ({ todo, onComplete, onUpdate }) => {
+const TodoListItem = ({
+  todo,
+  handleUpdate,
+  onCompleteTodo,
+  setIsEditing,
+  isEditing,
+  handleCancel,
+  handleEdit,
+}) => {
   const [workingTitle, setWorkingTitle] = useState(todo.title);
 
   useEffect(() => {
     setWorkingTitle(todo.title);
   }, [todo]);
+  
 
+  
   return (
-    <li style={{ marginTop: "1rem" }}>
-      <input
-        type="checkbox"
-        checked={todo.isCompleted}
-        onChange={() => onComplete(todo.id)}
-      />
-      <input
-        type="text"
-        value={workingTitle}
-        onChange={(e) => setWorkingTitle(e.target.value)}
-        onBlur={() => onUpdate({ ...todo, title: workingTitle })}
-        style={{
-          textDecoration: todo.isCompleted ? "line-through" : "none",
-          marginLeft: "0.5rem",
-        }}
-      />
-    </li>
+    <form onSubmit={handleUpdate}>
+      {isEditing ? (
+        <>
+          <TextInputWithLabel
+            elementId={`edit-todo-${todo.id}`}
+            label="Edit Todo"
+            value={workingTitle}
+            onChange={handleEdit}
+          />
+          <button type="button" onClick={handleCancel}>
+            Cancel
+          </button>
+          <button type="submit">Update</button>
+        </>
+      ) : (
+        <>
+          <label>
+            <input
+              type="checkbox"
+              id={`checkbox${todo.id}`}
+              checked={todo.isCompleted}
+              onChange={() => onCompleteTodo(todo.id)}
+            />
+          </label>
+          <span onClick={() => setIsEditing(true)}>{todo.title}</span>
+        </>
+      )}
+    </form>
   );
 };
 
