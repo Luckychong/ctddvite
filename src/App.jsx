@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import TodoList from "./features/TodoList/TodoList";
-import TodosViewForm from "./features/TodoList/TodosViewForm";
+import TodoList from "./features/TodoList";
+import TodosViewForm from "./features/TodosViewForm";
 
 const encodeUrl = ({ sortField, sortDirection, searchQuery, url }) => {
   let sortQuery = `sort[0][field]=${sortField}&sort[0][direction]=${sortDirection}`;
