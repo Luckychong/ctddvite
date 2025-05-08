@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import TodoList from "./features/TodoList";
 import TodosViewForm from "./features/TodosViewForm";
+import TodoForm from "./TodoList/TodoForm";
 
 const encodeUrl = ({ sortField, sortDirection, searchQuery, url }) => {
   let sortQuery = `sort[0][field]=${sortField}&sort[0][direction]=${sortDirection}`;
@@ -260,27 +261,7 @@ const TodoApp = () => {
         />
       </div>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          const input = e.target.elements.newTodo;
-          const value = input.value.trim();
-          if (value) {
-            handleAddTodo({ title: value });
-            input.value = "";
-          }
-        }}
-        style={{ marginBottom: "1rem" }}
-      >
-        <input
-          name="newTodo"
-          placeholder="New todo"
-          style={{ marginRight: "0.5rem" }}
-        />
-        <button type="submit" disabled={isSaving}>
-          {isSaving ? "Saving..." : "Add"}
-        </button>
-      </form>
+      <TodoForm onAddTodo={handleAddTodo} isSaving={isSaving} />
 
       <TodoList
         todos={todoList}
