@@ -23,7 +23,7 @@ const TodosViewForm = ({
         <input
           id="search"
           type="text"
-          value={queryString}
+          value={queryString || ""}
           onChange={(e) => setQueryString(e.target.value)}
           className="mx-2 border rounded px-2 py-1"
         />

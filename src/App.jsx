@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import TodoList from "./features/TodoList";
 import TodosViewForm from "./features/TodosViewForm";
-import TodoForm from "./TodoList/TodoForm";
+import TodoForm from "./features/TodoForm";
 
 const encodeUrl = ({ sortField, sortDirection, searchQuery, url }) => {
   let sortQuery = `sort[0][field]=${sortField}&sort[0][direction]=${sortDirection}`;
@@ -14,7 +14,6 @@ const encodeUrl = ({ sortField, sortDirection, searchQuery, url }) => {
   return encodeURI(`${url}?${sortQuery}${searchFilter}`);
 };
 
-
 const TodoApp = () => {
   const [todoList, setTodoList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +22,7 @@ const TodoApp = () => {
   const [sortField, setSortField] = useState("createdTime");
   const [sortDirection, setSortDirection] = useState("desc");
   const [searchQuery, setSearchQuery] = useState("");
+  const [queryString, setQueryString] = useState("");
 
   const url = `https://api.airtable.com/v0/${import.meta.env.VITE_BASE_ID}/${
     import.meta.env.VITE_TABLE_NAME
@@ -54,12 +54,11 @@ const TodoApp = () => {
 
         const data = await resp.json();
 
-       const fetchedTodos = data.records.map((record) => ({
-         id: record.id,
-         title: record.fields.title,
-         createdTime: record.fields.createdTime,
-       }));
-
+        const fetchedTodos = data.records.map((record) => ({
+          id: record.id,
+          title: record.fields.title,
+          createdTime: record.fields.createdTime,
+        }));
 
         setTodoList(fetchedTodos);
       } catch (err) {
@@ -146,7 +145,6 @@ const TodoApp = () => {
     };
 
     try {
-
       const encodedUrl = encodeUrl({
         url,
         sortField,
@@ -251,22 +249,15 @@ const TodoApp = () => {
         </div>
       )}
 
-      <div style={{ marginBottom: "1rem" }}>
-        <input
-          type="text"
-          placeholder="Search todos..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ width: "100%", padding: "0.25rem" }}
-        />
-      </div>
-      <TodoForm handleAddTodo={handleAddTodo} isSaving={isSaving} />
+     
+
+      <TodoForm onAddTodo={handleAddTodo} isSaving={isSaving} />
 
       <TodoList
         todos={todoList}
-        onComplete={completeTodo}
-        onUpdate={updateTodo}
         isLoading={isLoading}
+        onToggleComplete={completeTodo}
+        onUpdateTodo={updateTodo}
       />
 
       <hr />
@@ -275,6 +266,8 @@ const TodoApp = () => {
         setSortField={setSortField}
         sortDirection={sortDirection}
         setSortDirection={setSortDirection}
+        queryString={queryString}
+        setQueryString={setQueryString}
       />
     </div>
   );
