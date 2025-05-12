@@ -1,11 +1,11 @@
 import React from "react";
+import TextInputWithLabel from "../shared/TextInputWithLabel";
 
 const TodosViewForm = ({
   sortField,
   setSortField,
   sortDirection,
   setSortDirection,
-  queryString,
   setQueryString,
 }) => {
   const preventRefresh = (e) => {
@@ -18,23 +18,18 @@ const TodosViewForm = ({
 
   return (
     <form onSubmit={preventRefresh}>
-      <div className="mb-2">
-        <label htmlFor="search">Search todos:</label>
-        <input
+        <TextInputWithLabel
           id="search"
+          label="Search todos:"
           type="text"
-          value={queryString || ""}
           onChange={(e) => setQueryString(e.target.value)}
-          className="mx-2 border rounded px-2 py-1"
         />
         <button
           type="button"
           onClick={clearQuery}
-          className="border px-2 py-1 rounded"
         >
           Clear
         </button>
-      </div>
       <div>
         <label htmlFor="sortField">Sort by</label>
         <select
@@ -52,7 +47,6 @@ const TodosViewForm = ({
           id="sortDirection"
           value={sortDirection}
           onChange={(e) => setSortDirection(e.target.value)}
-          className="mx-2"
         >
           <option value="asc">Ascending</option>
           <option value="desc">Descending</option>

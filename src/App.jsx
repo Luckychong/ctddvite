@@ -3,12 +3,12 @@ import TodoList from "./features/TodoList";
 import TodosViewForm from "./features/TodosViewForm";
 import TodoForm from "./features/TodoForm";
 
-const encodeUrl = ({ sortField, sortDirection, searchQuery, url }) => {
+const encodeUrl = ({ sortField, sortDirection, queryString, url }) => {
   let sortQuery = `sort[0][field]=${sortField}&sort[0][direction]=${sortDirection}`;
   let searchFilter = "";
 
-  if (searchQuery) {
-    searchFilter = `&filterByFormula=SEARCH("${searchQuery}", title)`;
+  if (queryString) {
+    searchFilter = `&filterByFormula=SEARCH("${queryString}", title)`;
   }
 
   return encodeURI(`${url}?${sortQuery}${searchFilter}`);
@@ -21,29 +21,32 @@ const TodoApp = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [sortField, setSortField] = useState("createdTime");
   const [sortDirection, setSortDirection] = useState("desc");
-  const [searchQuery, setSearchQuery] = useState("");
   const [queryString, setQueryString] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
 
   const url = `https://api.airtable.com/v0/${import.meta.env.VITE_BASE_ID}/${
     import.meta.env.VITE_TABLE_NAME
   }`;
   const token = `Bearer ${import.meta.env.VITE_PAT || ""}`;
 
+ useEffect(() => {
+   const timer = setTimeout(() => {
+     setQueryString(searchTerm);
+   }, 500);
+
+   return () => clearTimeout(timer);
+ }, [searchTerm]);
+ 
   useEffect(() => {
     const fetchTodos = async () => {
       setIsLoading(true);
-      if (!token || token === "Bearer ") {
-        setErrorMessage("Missing API token.");
-        setIsLoading(false);
-        return;
-      }
-
       try {
         const encodedUrl = encodeUrl({
           url,
           sortField,
           sortDirection,
-          searchQuery,
+          queryString,
         });
 
         const resp = await fetch(encodedUrl, {
@@ -57,7 +60,8 @@ const TodoApp = () => {
         const fetchedTodos = data.records.map((record) => ({
           id: record.id,
           title: record.fields.title,
-          createdTime: record.fields.createdTime,
+          isCompleted: record.fields.isCompleted || false,
+          createdTime: record.fields.createdTime || new Date().toISOString(),
         }));
 
         setTodoList(fetchedTodos);
@@ -69,7 +73,7 @@ const TodoApp = () => {
     };
 
     fetchTodos();
-  }, [sortField, sortDirection, searchQuery]);
+  }, [sortField, sortDirection, queryString, token, url]);
 
   const handleAddTodo = async (newTodo) => {
     setIsSaving(true);
@@ -78,31 +82,25 @@ const TodoApp = () => {
         records: [{ fields: { title: newTodo.title, isCompleted: false } }],
       };
 
-      const encodedUrl = encodeUrl({
-        url,
-        sortField,
-        sortDirection,
-        searchQuery,
-      });
+       const resp = await fetch(url, {
+         method: "POST",
+         headers: {
+           Authorization: token,
+           "Content-Type": "application/json",
+         },
+         body: JSON.stringify(payload),
+       });
 
-      const resp = await fetch(encodedUrl, {
-        method: "POST",
-        headers: {
-          Authorization: token,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+       if (!resp.ok) throw new Error(await resp.text());
 
-      if (!resp.ok) throw new Error(await resp.text());
+       const data = await resp.json();
+       const added = {
+         id: data.records[0].id,
+         title: data.records[0].fields.title,
+         isCompleted: false,
+         createdTime: data.records[0].fields.createdTime || new Date().toISOString(),
+       };
 
-      const data = await resp.json();
-      const added = {
-        id: data.records[0].id,
-        title: data.records[0].fields.title,
-        isCompleted: false,
-        createdTime: data.records[0].fields.createdTime,
-      };
 
       setTodoList((prev) => [...prev, added]);
     } catch (err) {
@@ -114,7 +112,6 @@ const TodoApp = () => {
 
   const updateTodo = async (editedTodo) => {
     setIsSaving(true);
-
     const originalTodo = todoList.find((todo) => todo.id === editedTodo.id);
 
     const updatedTodos = todoList.map((todo) =>
@@ -145,17 +142,8 @@ const TodoApp = () => {
     };
 
     try {
-      const encodedUrl = encodeUrl({
-        url,
-        sortField,
-        sortDirection,
-        searchQuery,
-      });
-
-      const resp = await fetch(encodedUrl, options);
-
+      const resp = await fetch(url, options);
       if (!resp.ok) throw new Error(await resp.text());
-
       await resp.json();
     } catch (error) {
       console.error(error);
@@ -169,6 +157,7 @@ const TodoApp = () => {
       setIsSaving(false);
     }
   };
+
 
   const completeTodo = async (id) => {
     setIsSaving(true);
@@ -208,14 +197,7 @@ const TodoApp = () => {
     };
 
     try {
-      const encodedUrl = encodeUrl({
-        url,
-        sortField,
-        sortDirection,
-        searchQuery,
-      });
-
-      const resp = await fetch(encodedUrl, options);
+      const resp = await fetch(url, options);
 
       if (!resp.ok) throw new Error(await resp.text());
 
@@ -249,8 +231,6 @@ const TodoApp = () => {
         </div>
       )}
 
-     
-
       <TodoForm onAddTodo={handleAddTodo} isSaving={isSaving} />
 
       <TodoList
@@ -266,8 +246,8 @@ const TodoApp = () => {
         setSortField={setSortField}
         sortDirection={sortDirection}
         setSortDirection={setSortDirection}
-        queryString={queryString}
-        setQueryString={setQueryString}
+        queryString={searchTerm}
+        setQueryString={setSearchTerm}
       />
     </div>
   );
