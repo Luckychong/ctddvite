@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import TextInputWithLabel from "../shared/TextInputWithLabel";
 
 const TodosViewForm = ({
@@ -6,30 +6,42 @@ const TodosViewForm = ({
   setSortField,
   sortDirection,
   setSortDirection,
+  queryString,
   setQueryString,
 }) => {
+  const [inputValue, setInputValue] = useState(queryString || "");
+
+  useEffect(() => {
+    setInputValue(queryString || "");
+  }, [queryString]);
+
   const preventRefresh = (e) => {
     e.preventDefault();
   };
 
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setInputValue(value);
+    setQueryString(value);
+  };
+
   const clearQuery = () => {
+    setInputValue("");
     setQueryString("");
   };
 
   return (
     <form onSubmit={preventRefresh}>
-        <TextInputWithLabel
-          id="search"
-          label="Search todos:"
-          type="text"
-          onChange={(e) => setQueryString(e.target.value)}
-        />
-        <button
-          type="button"
-          onClick={clearQuery}
-        >
-          Clear
-        </button>
+      <TextInputWithLabel
+        id="search"
+        label="Search todos:"
+        type="text"
+        value={inputValue}
+        onChange={handleInputChange}
+      />
+      <button type="button" onClick={clearQuery}>
+        Clear
+      </button>
       <div>
         <label htmlFor="sortField">Sort by</label>
         <select

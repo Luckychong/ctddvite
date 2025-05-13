@@ -21,7 +21,6 @@ const TodoApp = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [sortField, setSortField] = useState("createdTime");
   const [sortDirection, setSortDirection] = useState("desc");
-  const [queryString, setQueryString] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
 
@@ -29,15 +28,6 @@ const TodoApp = () => {
     import.meta.env.VITE_TABLE_NAME
   }`;
   const token = `Bearer ${import.meta.env.VITE_PAT || ""}`;
-
- useEffect(() => {
-   const timer = setTimeout(() => {
-     setQueryString(searchTerm);
-   }, 500);
-
-   return () => clearTimeout(timer);
- }, [searchTerm]);
- 
   useEffect(() => {
     const fetchTodos = async () => {
       setIsLoading(true);
@@ -46,7 +36,7 @@ const TodoApp = () => {
           url,
           sortField,
           sortDirection,
-          queryString,
+          queryString: searchTerm,
         });
 
         const resp = await fetch(encodedUrl, {
@@ -73,7 +63,8 @@ const TodoApp = () => {
     };
 
     fetchTodos();
-  }, [sortField, sortDirection, queryString, token, url]);
+  }, [sortField, sortDirection, searchTerm, token, url]);
+
 
   const handleAddTodo = async (newTodo) => {
     setIsSaving(true);
