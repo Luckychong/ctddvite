@@ -2,17 +2,9 @@ import React, { useState, useEffect } from "react";
 import TodoList from "./features/TodoList";
 import TodosViewForm from "./features/TodosViewForm";
 import TodoForm from "./features/TodoForm";
+import {useCallback} from "react";
 
-const encodeUrl = ({ sortField, sortDirection, queryString, url }) => {
-  let sortQuery = `sort[0][field]=${sortField}&sort[0][direction]=${sortDirection}`;
-  let searchFilter = "";
 
-  if (queryString) {
-    searchFilter = `&filterByFormula=SEARCH("${queryString}", title)`;
-  }
-
-  return encodeURI(`${url}?${sortQuery}${searchFilter}`);
-};
 
 const TodoApp = () => {
   const [todoList, setTodoList] = useState([]);
@@ -27,17 +19,25 @@ const TodoApp = () => {
   const url = `https://api.airtable.com/v0/${import.meta.env.VITE_BASE_ID}/${
     import.meta.env.VITE_TABLE_NAME
   }`;
+
   const token = `Bearer ${import.meta.env.VITE_PAT || ""}`;
+  const encodeUrl = useCallback(() => {
+    let sortQuery = `sort[0][field]=${sortField}&sort[0][direction]=${sortDirection}`;
+    let searchFilter = "";
+
+    if (searchTerm) {
+      searchFilter = `&filterByFormula=SEARCH("${searchTerm}", title)`;
+    }
+
+    return encodeURI(`${url}?${sortQuery}${searchFilter}`);
+  }, [sortField, sortDirection, searchTerm, url]);
+
   useEffect(() => {
     const fetchTodos = async () => {
+      console.log("Fetching todos with query:", searchTerm);
       setIsLoading(true);
       try {
-        const encodedUrl = encodeUrl({
-          url,
-          sortField,
-          sortDirection,
-          queryString: searchTerm,
-        });
+        const encodedUrl = encodeUrl();
 
         const resp = await fetch(encodedUrl, {
           headers: { Authorization: token },

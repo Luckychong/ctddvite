@@ -15,20 +15,26 @@ const TodosViewForm = ({
     setInputValue(queryString || "");
   }, [queryString]);
 
-  const preventRefresh = (e) => {
-    e.preventDefault();
-  };
+    useEffect(() => {
+      const debounce = setTimeout(() => {
+        setQueryString(inputValue);
+      }, 500);
 
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    setInputValue(value);
-    setQueryString(value);
-  };
+      return () => clearTimeout(debounce);
+    }, [inputValue, setQueryString]);
 
-  const clearQuery = () => {
-    setInputValue("");
-    setQueryString("");
-  };
+   const handleInputChange = (e) => {
+     setInputValue(e.target.value); 
+   };
+
+   const clearQuery = () => {
+     setInputValue("");
+     setQueryString("");
+   };
+
+   const preventRefresh = (e) => {
+     e.preventDefault();
+   };
 
   return (
     <form onSubmit={preventRefresh}>
